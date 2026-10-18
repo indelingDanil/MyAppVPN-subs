@@ -11,7 +11,7 @@
 проверяет живость и публикует очищенные списки. Приложение подтягивает их как встроенную подписку.
 
 📣 **Новости и релизы:** Telegram-канал [@myappvpn_dprog](https://t.me/myappvpn_dprog) ·
-📦 **Приложение:** [github.com/indelingDanil/MyAppVPN](https://github.com/indelingDanil/MyAppVPN)
+📦 **Скачать приложение:** [релизы MyAppVPN](https://github.com/indelingDanil/MyAppVPN/releases)
 
 ## ❤️ Поддержать проект
 
@@ -128,7 +128,7 @@ are pruned. Exclusions are listed with reasons in `stats.md` / `meta.json`.
 
 **Add a source:** PR a raw URL to `registry/pinned.txt`. **Security:** free servers may log or MITM your traffic.
 
-**News:** Telegram [@myappvpn_dprog](https://t.me/myappvpn_dprog). **Support the project** (voluntary):
+**Download the app:** [MyAppVPN releases](https://github.com/indelingDanil/MyAppVPN/releases). **News:** Telegram [@myappvpn_dprog](https://t.me/myappvpn_dprog). **Support the project** (voluntary):
 [CloudTips](https://pay.cloudtips.ru/p/8c90d7a5) · USDT TRC20 `TB3Qn2guzVdj93kUi43KG8gQY6mruGZbNG` ·
 BTC `16Bs15Mpu2HAYyVjgiLdwQC1yzLpbf2qyv` · ETH `0x3704ecc83ea8b6a852d63dc82c0badcd761d8e6f`
 
