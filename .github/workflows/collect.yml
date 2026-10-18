@@ -1,0 +1,110 @@
+name: collect
+
+# Every 3 hours (never more often — GitHub Actions ToS / fair use) + manual.
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+
+# One pipeline at a time (shared with discover.yml); never cancel a running publish.
+concurrency:
+  group: subs-pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  # Pinned xray-knife release + sha256 of Xray-knife-linux-64.zip (from the release's SHA256SUMS / asset digest).
+  # To upgrade: pick a release ≥ 2 weeks old, update both values, run the workflow manually.
+  XRAY_KNIFE_VERSION: v11.3.0
+  XRAY_KNIFE_SHA256: ad803fe2b0cfcecb1d87423effa98a36ae95587d56a377446a84e3a811b7f83b
+  # GeoLite2-Country re-published without a license key (MaxMind GeoLite2, CC BY-SA 4.0).
+  # Only a fallback: the remark country normally comes from the egress IP xray-knife reports.
+  MMDB_URL: https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
+  REPO_CDN: indelingDanil/MyAppVPN-subs
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Restore state from the output branch
+        run: |
+          mkdir -p work/state prev
+          if git fetch --depth=1 origin output 2>/dev/null; then
+            git archive FETCH_HEAD | tar -x -C prev
+            cp prev/state/*.json work/state/ 2>/dev/null || true
+          else
+            echo "no output branch yet — first run"
+          fi
+          ls -la work/state
+
+      - name: Download GeoLite2-Country
+        run: |
+          if curl -fsSL --retry 3 --max-time 120 -o GeoLite2-Country.mmdb "$MMDB_URL"; then
+            ls -la GeoLite2-Country.mmdb
+          else
+            echo "::warning::mmdb download failed — falling back to xray-knife egress country only"
+            rm -f GeoLite2-Country.mmdb
+          fi
+
+      - name: Install xray-knife ${{ env.XRAY_KNIFE_VERSION }}
+        run: |
+          curl -fsSL --retry 3 -o xk.zip \
+            "https://github.com/lilendian0x00/xray-knife/releases/download/${XRAY_KNIFE_VERSION}/Xray-knife-linux-64.zip"
+          echo "${XRAY_KNIFE_SHA256}  xk.zip" | sha256sum -c -
+          unzip -q -o xk.zip -d xk
+          XK=$(find xk -type f -name 'xray-knife' | head -n1)
+          chmod +x "$XK"
+          "$XK" --version
+          echo "XK=$PWD/$XK" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: go build -trimpath -o subs ./cmd/subs
+
+      - name: Collect
+        run: ./subs collect --dir work --registry registry
+
+      - name: Validate (TCP + xray real delay)
+        run: ./subs validate --dir work --registry registry --xray-knife "$XK"
+
+      - name: Publish
+        run: |
+          MMDB_ARG=""
+          [ -f GeoLite2-Country.mmdb ] && MMDB_ARG="--mmdb GeoLite2-Country.mmdb"
+          ./subs publish --dir work --out out $MMDB_ARG
+          ./subs check --out out
+          cat out/stats.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push to orphan branch "output" (single commit, force)
+        run: |
+          cd out
+          git init -q -b output
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "output $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" output
+
+      - name: Purge jsDelivr cache for changed files
+        continue-on-error: true
+        run: |
+          cd out
+          for f in vless.txt vless.b64 reality.txt reality.b64 meta.json stats.md by-country/*.txt; do
+            [ -f "$f" ] || continue
+            if [ -f "../prev/$f" ] && cmp -s "$f" "../prev/$f"; then continue; fi
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "https://purge.jsdelivr.net/gh/${REPO_CDN}@output/$f")
+            echo "purge $f -> $code"
+          done

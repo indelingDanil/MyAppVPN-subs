@@ -1,0 +1,52 @@
+name: discover
+
+# Weekly: find new sources on GitHub, re-check dead ones, prune, commit registry/sources.json.
+on:
+  schedule:
+    - cron: '41 4 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: subs-pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Fetch latest per-source stats from the output branch
+        run: |
+          mkdir -p work/state
+          if git fetch --depth=1 origin output 2>/dev/null; then
+            git show FETCH_HEAD:state/sources.json > work/state/sources.json 2>/dev/null || true
+          fi
+
+      - name: Discover + prune
+        run: |
+          go build -trimpath -o subs ./cmd/subs
+          ./subs discover --registry registry --state work/state/sources.json
+
+      - name: Commit registry changes
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add registry/sources.json
+          if git diff --cached --quiet; then
+            echo "registry unchanged"
+          else
+            git commit -q -m "registry: weekly discover $(date -u +%Y-%m-%d)"
+            git push -q
+          fi

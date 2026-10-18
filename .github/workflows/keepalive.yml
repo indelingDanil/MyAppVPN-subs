@@ -1,0 +1,43 @@
+name: keepalive
+
+# GitHub disables scheduled workflows in public repos after 60 days without repository
+# activity. Monthly: (1) re-enable our workflows via the REST API
+# (PUT /repos/{o}/{r}/actions/workflows/{id}/enable), and (2) as a last resort, if main has
+# had no commit for 45 days, push an empty commit (normally discover.yml commits weekly).
+on:
+  schedule:
+    - cron: '7 6 1 * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Re-enable scheduled workflows
+        run: |
+          for wf in collect.yml discover.yml keepalive.yml; do
+            gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/${wf}/enable" && echo "enabled $wf" || echo "::warning::could not enable $wf"
+          done
+
+      - name: Empty commit if main is idle for 45+ days
+        run: |
+          last=$(git log -1 --format=%ct)
+          age=$(( ( $(date +%s) - last ) / 86400 ))
+          echo "last commit on main: ${age} days ago"
+          if [ "$age" -ge 45 ]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -q --allow-empty -m "keepalive"
+            git push -q
+          fi

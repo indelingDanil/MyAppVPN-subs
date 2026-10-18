@@ -1,0 +1,7 @@
+# Sources to ignore during discover/collect. One entry per line; '#' starts a comment.
+#   host            -> blocks the host and all its subdomains   (example.com)
+#   URL prefix      -> blocks every URL starting with it         (raw.githubusercontent.com/someone/somerepo/)
+# This repo's own output must never be re-ingested:
+raw.githubusercontent.com/indelingDanil/MyAppVPN-subs/
+cdn.jsdelivr.net/gh/indelingDanil/MyAppVPN-subs
+raw.githack.com

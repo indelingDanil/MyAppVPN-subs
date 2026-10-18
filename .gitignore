@@ -1,0 +1,14 @@
+# binaries
+/subs
+/subs.exe
+*.exe
+/xk/
+xk.zip
+xray-knife*
+# geo databases
+*.mmdb
+# work directories / outputs
+/work/
+/out/
+/prev/
+*.jsonl
