@@ -10,6 +10,18 @@
 Бот на GitHub Actions сам **находит** публичные бесплатные VLESS-подписки на GitHub, собирает их, убирает дубли,
 проверяет живость и публикует очищенные списки. Приложение подтягивает их как встроенную подписку.
 
+📣 **Новости и релизы:** Telegram-канал [@myappvpn_dprog](https://t.me/myappvpn_dprog) ·
+📦 **Приложение:** [github.com/indelingDanil/MyAppVPN](https://github.com/indelingDanil/MyAppVPN)
+
+## ❤️ Поддержать проект
+
+Донаты — дело добровольное, но любая копеечка добавляет мотивации продолжать.
+
+- **CloudTips** (карта РФ / СБП): https://pay.cloudtips.ru/p/8c90d7a5
+- **USDT (TRC20):** `TB3Qn2guzVdj93kUi43KG8gQY6mruGZbNG`
+- **BTC:** `16Bs15Mpu2HAYyVjgiLdwQC1yzLpbf2qyv`
+- **ETH (ERC20):** `0x3704ecc83ea8b6a852d63dc82c0badcd761d8e6f`
+
 ## Ссылки для подписки
 
 Используйте **jsDelivr** первым — `raw.githubusercontent.com` в РФ часто тормозит/режется.
@@ -115,6 +127,10 @@ non-pinned ones pruned when the weekly discover still gets 404. Not updated for 
 are pruned. Exclusions are listed with reasons in `stats.md` / `meta.json`.
 
 **Add a source:** PR a raw URL to `registry/pinned.txt`. **Security:** free servers may log or MITM your traffic.
+
+**News:** Telegram [@myappvpn_dprog](https://t.me/myappvpn_dprog). **Support the project** (voluntary):
+[CloudTips](https://pay.cloudtips.ru/p/8c90d7a5) · USDT TRC20 `TB3Qn2guzVdj93kUi43KG8gQY6mruGZbNG` ·
+BTC `16Bs15Mpu2HAYyVjgiLdwQC1yzLpbf2qyv` · ETH `0x3704ecc83ea8b6a852d63dc82c0badcd761d8e6f`
 
 ### Design notes
 
