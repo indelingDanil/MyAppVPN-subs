@@ -2,6 +2,5 @@
 # Add a source with a pull request (see README). Raw file URLs only.
 https://raw.githubusercontent.com/zieng2/wl/main/vless_universal.txt
 https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/BLACK_VLESS_RUS.txt
-https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/26.txt
-https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/1.txt
-https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/6.txt
+https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/BLACK_VLESS_RUS_mobile.txt
+https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/Vless-Reality-White-Lists-Rus-Mobile.txt
