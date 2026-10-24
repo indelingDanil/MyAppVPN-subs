@@ -1,0 +1,2 @@
+vless://c8b3c1d7-4294-4f30-9e5b-e4693b64d518@185.86.145.142:443?alpn=http%2F1.1&encryption=none&fp=edge&host=deliverya.online&path=%2Fadrws&security=tls&sni=deliverya.online&type=ws#%F0%9F%87%B5%F0%9F%87%B1%20PL%20tls-0353
+vless://c8b3c1d7-4294-4f30-9e5b-e4693b64d518@deliverya.online:443?encryption=none&type=ws&security=tls&sni=deliverya.online&alpn=http%2F1.1&path=%2Fadrws&host=deliverya.online&fp=android#%F0%9F%87%B5%F0%9F%87%B1%20PL%20tls-0354

@@ -1,0 +1,2 @@
+vless://846cedee-2a52-0001-a0b9-11850ead6a8b@79.98.37.106:443?encryption=none&flow=xtls-rprx-vision&pbk=USSepsAbvP9LpByHLV2xD2H8dq8GAJ6G0fINEqD4PAw&security=reality&sni=ee-central.v8x2b.lol&type=tcp&fp=edge#%F0%9F%87%AA%F0%9F%87%AA%20EE%20reality-0008
+vless://846cedee-2a52-0001-a0b9-11850ead6a8b@ee-central.v8x2b.lol:443?type=raw&security=reality&flow=xtls-rprx-vision&pbk=USSepsAbvP9LpByHLV2xD2H8dq8GAJ6G0fINEqD4PAw&sni=ee-central.v8x2b.lol&fp=chrome#%F0%9F%87%AA%F0%9F%87%AA%20EE%20reality-0014

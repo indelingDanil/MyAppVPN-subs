@@ -1,0 +1,2 @@
+vless://b054e267-e2d8-4ca2-b95e-79ca5cb7cf9a@support.zoom.us:443?security=tls&type=ws&path=%2F&host=cloud.ghostdev.lk&sni=cloud.ghostdev.lk&fp=android#%F0%9F%87%B8%F0%9F%87%AC%20SG%20tls-0199
+vless://b054e267-e2d8-4ca2-b95e-79ca5cb7cf9a@support.zoom.us:443?type=ws&security=tls&fp=chrome&sni=cloud.ghostdev.lk&host=cloud.ghostdev.lk#%F0%9F%87%B8%F0%9F%87%AC%20SG%20tls-0261

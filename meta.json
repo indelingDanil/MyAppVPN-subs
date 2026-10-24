@@ -1,0 +1,66 @@
+{
+  "alive_total": 393,
+  "counts": {
+    "by_country": {
+      "DE": 10,
+      "EE": 2,
+      "FI": 2,
+      "FR": 3,
+      "GB": 2,
+      "IT": 2,
+      "JP": 36,
+      "NL": 6,
+      "PL": 2,
+      "RU": 9,
+      "SE": 1,
+      "SG": 2,
+      "TH": 4,
+      "TR": 2,
+      "US": 310
+    },
+    "reality": 25,
+    "tls": 89,
+    "total": 114
+  },
+  "excluded": [
+    {
+      "url": "https://raw.githubusercontent.com/pie-with-jam/PulseProxy/main/githubmirror/2.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Barabama/FreeNodes/feat/ai-crawler-v2/nodes/clashnode.txt",
+      "reason": "404 (gone since 2026-10-23)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Barabama/FreeNodes/feat/ai-crawler-v2/nodes/clashmeta.txt",
+      "reason": "404 (gone since 2026-10-23)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Barabama/FreeNodes/feat/ai-crawler-v2/nodes/freeclashnode.txt",
+      "reason": "404 (gone since 2026-10-23)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Barabama/FreeNodes/feat/ai-crawler-v2/nodes/nodev2ray.txt",
+      "reason": "404 (gone since 2026-10-23)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hans-thomas/v2ray-subscription/master/servers.txt",
+      "reason": "stale 9d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/DarkRoyalty/shnajder-vpn-configs/main/githubmirror/11.txt",
+      "reason": "stale 9d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Barabama/FreeNodes/feat/ai-crawler-v2/nodes/clashstair.txt",
+      "reason": "404 (gone since 2026-10-23)"
+    }
+  ],
+  "files": {
+    "reality.txt": 25,
+    "vless.txt": 114
+  },
+  "schema": 1,
+  "sources_used": 264,
+  "updated_at": "2026-10-24T16:06:30Z"
+}

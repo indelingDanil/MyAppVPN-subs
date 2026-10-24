@@ -1,0 +1,2 @@
+vless://78559873-84ef-4cab-a0b2-46d4cd20de4a@179.255.190.43:8443?encryption=none&path=%2Fassets&security=tls&sni=itly.yandex-api.store&type=ws&fp=chrome#%F0%9F%87%AE%F0%9F%87%B9%20IT%20tls-0194
+vless://78559873-84ef-4cab-a0b2-46d4cd20de4a@itly.yandex-api.store:8443?encryption=none&type=ws&security=tls&sni=itly.yandex-api.store&alpn=http%2F1.1&path=%2Fassets&fp=chrome#%F0%9F%87%AE%F0%9F%87%B9%20IT%20tls-0196
