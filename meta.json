@@ -1,0 +1,91 @@
+{
+  "alive_total": 263,
+  "counts": {
+    "by_country": {
+      "DE": 22,
+      "FI": 1,
+      "HK": 3,
+      "ID": 1,
+      "JP": 37,
+      "KR": 1,
+      "LT": 6,
+      "NL": 6,
+      "PL": 2,
+      "RU": 2,
+      "SG": 9,
+      "US": 173
+    },
+    "reality": 11,
+    "tls": 117,
+    "total": 128
+  },
+  "excluded": [
+    {
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vless.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_base64_Sub.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub5.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub3.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub6.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub4.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub7.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/terik21/HiddifySubs-VlessKeys/main/WhiteKeys2",
+      "reason": "stale 12d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub2.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/terik21/HiddifySubs-VlessKeys/main/WhiteKeys",
+      "reason": "stale 12d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/pie-with-jam/PulseProxy/main/githubmirror/11.txt",
+      "reason": "stale 16d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt",
+      "reason": "stale 16d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/DarkRoyalty/shnajder-vpn-configs/main/githubmirror/11.txt",
+      "reason": "stale 16d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/batches/v2ray/batch_010.txt",
+      "reason": "404 (gone since 2026-10-28)"
+    }
+  ],
+  "files": {
+    "reality.txt": 11,
+    "vless.txt": 128
+  },
+  "schema": 1,
+  "sources_used": 263,
+  "updated_at": "2026-10-31T12:47:02Z"
+}
