@@ -1,0 +1,134 @@
+{
+  "alive_total": 71,
+  "counts": {
+    "by_country": {
+      "CH": 1,
+      "EE": 1,
+      "FI": 1,
+      "GB": 3,
+      "JP": 24,
+      "NL": 5,
+      "US": 36
+    },
+    "reality": 17,
+    "tls": 54,
+    "total": 71
+  },
+  "excluded": [
+    {
+      "url": "https://cdn.jsdelivr.net/gh/Diversan313/apex-parser/subs/main/alive_full.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Diversan313/apex-parser/main/subs/main/alive_plain_full.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Diversan313/apex-parser/main/subs/main/alive_full.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/gh/Diversan313/apex-parser/subs/main/alive_plain_full.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/gh/Diversan313/apex-parser/subs/main/alive_bl.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/gh/Diversan313/apex-parser/subs/main/alive_plain_bl.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Diversan313/apex-parser/main/subs/main/alive_bl.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Diversan313/apex-parser/main/subs/main/alive_plain_bl.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-6.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/v2ray-base64.txt",
+      "reason": "stale 8d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/freenodess/freenodess/main/nodes/v2ray-base64.txt",
+      "reason": "stale 7d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-5.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/terik21/HiddifySubs-VlessKeys/main/WhiteKeys2",
+      "reason": "stale 19d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/batches/v2ray/batch_010.txt",
+      "reason": "404 (gone since 2026-11-02)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/terik21/HiddifySubs-VlessKeys/main/WhiteKeys",
+      "reason": "stale 19d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/batches/v2ray/batch_008.txt",
+      "reason": "404 (gone since 2026-11-07)"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/gh/Diversan313/apex-parser/subs/main/alive_bs.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/gh/Diversan313/apex-parser/subs/main/alive_plain_bs.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Diversan313/apex-parser/main/subs/main/alive_bs.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Diversan313/apex-parser/main/subs/main/alive_plain_bs.txt",
+      "reason": "stale 11d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hiztin/VLESS-PO-GRIBI/main/deploy/subscriptions/11.txt",
+      "reason": "stale 23d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/pie-with-jam/PulseProxy/main/githubmirror/11.txt",
+      "reason": "stale 23d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt",
+      "reason": "stale 23d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/DarkRoyalty/shnajder-vpn-configs/main/githubmirror/11.txt",
+      "reason": "stale 23d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/pourih/xray-bench/main/results/nodes_http.txt",
+      "reason": "404 (gone since 2026-11-06)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/pashadolf/Eternal-Sub/main/gemini-sub.txt",
+      "reason": "stale 16d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/batches/v2ray/batch_009.txt",
+      "reason": "404 (gone since 2026-11-07)"
+    }
+  ],
+  "files": {
+    "reality.txt": 17,
+    "vless.txt": 71
+  },
+  "schema": 1,
+  "sources_used": 269,
+  "updated_at": "2026-11-07T17:50:25Z"
+}
