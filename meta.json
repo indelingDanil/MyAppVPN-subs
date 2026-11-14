@@ -1,0 +1,72 @@
+{
+  "alive_total": 229,
+  "counts": {
+    "by_country": {
+      "CA": 1,
+      "CH": 1,
+      "DE": 5,
+      "EE": 1,
+      "ES": 3,
+      "FI": 1,
+      "FR": 7,
+      "GB": 2,
+      "GR": 1,
+      "IN": 1,
+      "IT": 2,
+      "JP": 31,
+      "KR": 2,
+      "LV": 1,
+      "NL": 12,
+      "PL": 11,
+      "RO": 1,
+      "RU": 3,
+      "SE": 1,
+      "SG": 12,
+      "US": 130
+    },
+    "reality": 46,
+    "tls": 90,
+    "total": 136
+  },
+  "excluded": [
+    {
+      "url": "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-6.txt",
+      "reason": "stale 18d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/v2ray-base64.txt",
+      "reason": "stale 15d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/freenodess/freenodess/main/nodes/v2ray-base64.txt",
+      "reason": "stale 14d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-4.txt",
+      "reason": "stale 13d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-5.txt",
+      "reason": "stale 18d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/terik21/HiddifySubs-VlessKeys/main/WhiteKeys2",
+      "reason": "stale 26d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/terik21/HiddifySubs-VlessKeys/main/WhiteKeys",
+      "reason": "stale 26d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/alireza786786/V2RAY-BREACHING-THE-BARRIERS/main/sub/normal/10Dream-VpnClashFaCollector-ping_passed.txt",
+      "reason": "stale 14d"
+    }
+  ],
+  "files": {
+    "reality.txt": 46,
+    "vless.txt": 136
+  },
+  "schema": 1,
+  "sources_used": 269,
+  "updated_at": "2026-11-14T10:40:58Z"
+}
