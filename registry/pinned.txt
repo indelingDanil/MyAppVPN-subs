@@ -4,3 +4,12 @@ https://raw.githubusercontent.com/zieng2/wl/main/vless_universal.txt
 https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/BLACK_VLESS_RUS.txt
 https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/BLACK_VLESS_RUS_mobile.txt
 https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/Vless-Reality-White-Lists-Rus-Mobile.txt
+# RU whitelist / SNI-bypass lists (checked 2026-11-21: updated daily, mostly REALITY).
+# US/EU runners can't reach many of these, so they only survive validation if pinned.
+https://raw.githubusercontent.com/aneek0/goida-vpn-configs/main/githubmirror/26.txt
+https://raw.githubusercontent.com/kort0881/vpn-vless-configs-russia/main/data/githubmirror/ru-sni/vless.txt
+https://raw.githubusercontent.com/kort0881/vpn-vless-configs-russia/main/data/githubmirror/ru-sni-local/vless.txt
+https://raw.githubusercontent.com/FLAT447/v2ray-lists/main/BLACK_FULL.txt
+https://raw.githubusercontent.com/FLAT447/v2ray-lists/main/WHITE_FULL.txt
+https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-all.txt
+https://raw.githubusercontent.com/histeenn/VLESS-PO-GRIBI/main/deploy/sub.txt
