@@ -3,7 +3,9 @@
 //
 //	subs discover --registry registry [--state work/state/sources.json]
 //	subs collect  --dir work [--registry registry] [--pinned-only]
-//	subs validate --dir work [--xray-knife ./xray-knife | --skip-xray]
+//	subs shards   --dir work [--per-shard 3000] [--max-shards 20]   (prints the shard count)
+//	subs validate --dir work [--xray-knife ./xray-knife | --skip-xray] [--shard i --shards N]
+//	subs merge    --dir work [--registry registry]   (combine validate shards → alive.jsonl + state)
 //	subs publish  --dir work [--out work/out] [--mmdb GeoLite2-Country.mmdb]
 //	subs check    --out work/out   (verify the published tree against the app contract)
 package main
@@ -25,7 +27,7 @@ import (
 )
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: subs <discover|collect|validate|publish|check> [flags]  (subs <stage> -h for flags)")
+	fmt.Fprintln(os.Stderr, "usage: subs <discover|collect|shards|validate|merge|publish|check> [flags]  (subs <stage> -h for flags)")
 	os.Exit(2)
 }
 
@@ -44,8 +46,28 @@ func main() {
 		err = runDiscover(ctx, args, now)
 	case "collect":
 		err = runCollect(ctx, args, now)
+	case "shards":
+		fs := flag.NewFlagSet("shards", flag.ExitOnError)
+		dir := fs.String("dir", "work", "work directory")
+		per := fs.Int("per-shard", 3000, "target candidates per validate shard")
+		maxN := fs.Int("max-shards", 20, "upper bound on shards (past it each shard gets more; nothing is dropped)")
+		_ = fs.Parse(args)
+		var n int
+		if n, err = pipeline.CountCandidates(*dir); err == nil {
+			fmt.Println(pipeline.ShardCount(n, *per, *maxN))
+		}
 	case "validate":
 		err = runValidate(ctx, args, now)
+	case "merge":
+		fs := flag.NewFlagSet("merge", flag.ExitOnError)
+		dir := fs.String("dir", "work", "work directory (candidates.jsonl, state/, shards/<i>/)")
+		regDir := fs.String("registry", "registry", "registry directory (for per-source alive stats)")
+		_ = fs.Parse(args)
+		var res pipeline.MergeResult
+		if res, err = pipeline.Merge(*dir, *regDir, now); err == nil {
+			log.Printf("merge: shards=%d present=%v missing=%v candidates=%d tcp_alive=%d xray_tested=%d alive=%d untested=%d",
+				res.Shards, res.Present, res.ShardsMissing, res.Candidates, res.TCPAlive, res.XrayTested, res.Alive, res.Untested)
+		}
 	case "publish":
 		err = runPublish(args, now)
 	case "check":
@@ -113,7 +135,7 @@ func runCollect(ctx context.Context, args []string, now time.Time) error {
 	dir := fs.String("dir", "work", "work directory")
 	var opt pipeline.CollectOptions
 	fs.StringVar(&opt.RegistryDir, "registry", "registry", "registry directory")
-	fs.IntVar(&opt.MaxCandidates, "max", 20000, "hard cap on unique candidates")
+	fs.IntVar(&opt.MaxCandidates, "max", 0, "cap on unique candidates, 0 = no cap (for quick local runs)")
 	fs.IntVar(&opt.Workers, "workers", 16, "concurrent source fetches")
 	fs.BoolVar(&opt.PinnedOnly, "pinned-only", false, "only fetch registry/pinned.txt sources")
 	fs.IntVar(&opt.FreshnessCalls, "freshness-calls", 200, "max GitHub commits-API calls per run for source freshness (20 without GITHUB_TOKEN)")
@@ -142,14 +164,16 @@ func runValidate(ctx context.Context, args []string, now time.Time) error {
 	fs.IntVar(&opt.XKThreads, "xk-threads", 100, "xray-knife threads")
 	fs.IntVar(&opt.XKTimeoutMs, "xk-timeout", 8000, "xray-knife max delay / timeout (ms)")
 	fs.StringVar(&opt.XKURL, "xk-url", "https://www.gstatic.com/generate_204", "URL tested through each config")
-	fs.IntVar(&opt.MaxXray, "max-xray", 6000, "test at most N TCP-alive configs with xray-knife (best first)")
+	fs.IntVar(&opt.MaxXray, "max-xray", 0, "xray-test at most N TCP-alive configs (best first), 0 = all (for quick local runs)")
+	fs.IntVar(&opt.Shard, "shard", 0, "this shard, 0..shards-1")
+	fs.IntVar(&opt.Shards, "shards", 1, "split candidates into N shards by key hash; >1 leaves the result in <dir>/shards/<shard>/ for merge")
 	fs.BoolVar(&opt.XKRealIP, "xk-rip", true, "let xray-knife report the egress IP/country (used for the remark)")
 	_ = fs.Parse(args)
 	res, err := pipeline.Validate(ctx, *dir, opt, now)
 	if err != nil {
 		return err
 	}
-	log.Printf("validate: candidates=%d tcp_alive=%d xray_tested=%d alive=%d", res.Candidates, res.TCPAlive, res.XrayTested, res.Alive)
+	log.Printf("validate: shard=%d/%d candidates=%d tcp_alive=%d xray_tested=%d alive=%d", opt.Shard, max(opt.Shards, 1), res.Candidates, res.TCPAlive, res.XrayTested, res.Alive)
 	return nil
 }
 

@@ -22,6 +22,7 @@ Use **jsDelivr** first: `raw.githubusercontent.com` is often slow or blocked in 
 | `vless.txt` (main list) | [link](https://cdn.jsdelivr.net/gh/indelingDanil/MyAppVPN-subs@output/vless.txt) | [link](https://raw.githack.com/indelingDanil/MyAppVPN-subs/output/vless.txt) | [link](https://raw.githubusercontent.com/indelingDanil/MyAppVPN-subs/output/vless.txt) |
 | `reality.txt` (REALITY only) | [link](https://cdn.jsdelivr.net/gh/indelingDanil/MyAppVPN-subs@output/reality.txt) | [link](https://raw.githack.com/indelingDanil/MyAppVPN-subs/output/reality.txt) | [link](https://raw.githubusercontent.com/indelingDanil/MyAppVPN-subs/output/reality.txt) |
 | `by-country/<CC>.txt`, e.g. `DE` | [link](https://cdn.jsdelivr.net/gh/indelingDanil/MyAppVPN-subs@output/by-country/DE.txt) | [link](https://raw.githack.com/indelingDanil/MyAppVPN-subs/output/by-country/DE.txt) | [link](https://raw.githubusercontent.com/indelingDanil/MyAppVPN-subs/output/by-country/DE.txt) |
+| `all.txt` (every alive server) | [link](https://cdn.jsdelivr.net/gh/indelingDanil/MyAppVPN-subs@output/all.txt) | [link](https://raw.githack.com/indelingDanil/MyAppVPN-subs/output/all.txt) | [link](https://raw.githubusercontent.com/indelingDanil/MyAppVPN-subs/output/all.txt) |
 
 The main link for v2rayNG, Hiddify and similar clients:
 
@@ -38,10 +39,11 @@ https://cdn.jsdelivr.net/gh/indelingDanil/MyAppVPN-subs@output/vless.txt
 | `vless.txt` / `vless.b64` | Main list: up to 500 servers, REALITY first, then TLS, at most 40 per country, no RU/UA exits |
 | `reality.txt` / `reality.b64` | REALITY only: up to 500 servers, at most 60 per country, no RU/UA exits |
 | `by-country/<CC>.txt` | One file per country (ISO code), up to 500 servers. `RU.txt` exists for whitelist-only networks; `UA` is not published |
-| `meta.json` | Update time, counts (total / reality / tls / per country), sources used, excluded sources with reasons |
+| `all.txt` / `all.b64` | Every server that passed the check, in the same order, no line or per-country limit, RU included, no UA. Can be several MB: meant for clients that handle big lists, not for the app |
+| `meta.json` | Update time, counts (collected / TCP-alive / xray-alive / published, total / reality / tls / per country), sources used, excluded sources with reasons |
 | `stats.md` | The same stats in readable form |
 
-Each file has one `vless://` link per line (the `.b64` files hold the same list in base64) and stays under 1 MB. Server names are rewritten as `🇩🇪 DE reality-0012`, and MyAppVPN reads the country from the flag. Each run replaces the branch with a single commit, and the file paths stay the same.
+Each file has one `vless://` link per line (the `.b64` files hold the same list in base64). All files except `all.txt` stay under 1 MB. If `all.txt` ever outgrows GitHub's 100 MB file limit, it is split into `all-1.txt`, `all-2.txt`… (listed in `meta.json`); jsDelivr does not serve files over 20 MB, so for a list that big use the githack or GitHub raw link. Server names are rewritten as `🇩🇪 DE reality-0012`, and MyAppVPN reads the country from the flag. Each run replaces the branch with a single commit, and the file paths stay the same.
 
 ## How it works
 
@@ -50,8 +52,8 @@ discover (weekly) → collect → validate → publish   (every few hours)
 ```
 
 1. **Discover.** The bot searches GitHub for repos with public VLESS subscriptions pushed in the last 7 days and pulls raw file links out of them. It accepts a source with at least 20 valid `vless://` lines, or one where at least half the lines look like proxy links. The registry is `registry/sources.json`, up to 300 sources.
-2. **Collect.** The bot downloads all sources in parallel, decodes plain or base64 text and parses `vless://` strictly, without executing anything. It keeps only what the app accepts: `tls` or `reality` security (`none` is dropped), supported transports and flows, and a `pbk` key for REALITY. Duplicates are removed by server identity, ignoring the name and the parameter order.
-3. **Validate.** This step checks liveness only, not speed, because the runners sit in US/EU data centers. Each config gets a TCP connect, then a real request through it with [xray-knife](https://github.com/lilendian0x00/xray-knife). Configs that stay alive across many runs rank higher.
+2. **Collect.** The bot downloads all sources in parallel, decodes plain or base64 text and parses `vless://` strictly, without executing anything. It keeps only what the app accepts: `tls` or `reality` security (`none` is dropped), supported transports and flows, and a `pbk` key for REALITY. Duplicates are removed by server identity, ignoring the name and the parameter order. There is no limit on how many configs are kept.
+3. **Validate.** This step checks liveness only, not speed, because the runners sit in US/EU data centers. Each config gets a TCP connect, then a real request through it with [xray-knife](https://github.com/lilendian0x00/xray-knife). Every collected config is checked: the work is split into parallel jobs (shards) of about 3000 configs, up to 20 of them, and the results are merged before publishing. Configs that stay alive across many runs rank higher.
 4. **Publish.** Ranking puts REALITY before TLS, then sorts by stability, then by delay. The country comes from the egress IP, with GeoLite2 as a fallback. The files are checked against the app's format before the push.
 
 `collect.yml` is scheduled every 3 hours, but GitHub often runs scheduled jobs late or skips them, so in practice the list updates every few hours. The "list updated" badge at the top shows the last update.
@@ -100,6 +102,9 @@ Needs Go (the version in `go.mod`).
 ```sh
 go run ./cmd/subs collect  --dir work --registry registry          # add --pinned-only for a quick run
 go run ./cmd/subs validate --dir work --skip-xray                  # or --xray-knife ./xray-knife
+# or sharded, as in CI: one validate per shard, then merge
+#   go run ./cmd/subs validate --dir work --skip-xray --shard 0 --shards 2   (and --shard 1)
+#   go run ./cmd/subs merge    --dir work --registry registry
 go run ./cmd/subs publish  --dir work --out work/out --mmdb GeoLite2-Country.mmdb   # download from the P3TERX mirror, or drop --mmdb
 go run ./cmd/subs check    --out work/out
 GITHUB_TOKEN=... go run ./cmd/subs discover --registry registry --max-repos 20
@@ -109,6 +114,7 @@ go test ./...
 ## Design notes
 
 - **Branches.** The lists and the run state (`state/history.json`, `state/sources.json`) live on the `output` branch, which is force-pushed as one commit per run. On `main`, the bots only commit the weekly registry update from `discover.yml` (plus a rare keepalive commit).
+- **Sharding.** `collect.yml` runs as three jobs: `collect` (one job), `validate` (a matrix of `ceil(configs / 3000)` jobs, at most 20, each with its own 40-minute limit) and `publish`. A config always lands in the same shard (hash of its identity). Only the `publish` job updates `state/history.json` and the source stats, so the stability ranking works as with a single job. If a shard fails, its configs are left out of that run and their history stays as it was; `stats.md` says which shard is missing.
 - **Keepalive.** GitHub disables cron workflows after 60 days without activity. Once a month `keepalive.yml` re-enables them through the API, and it pushes an empty commit only if `main` has had no commits for 45 days.
 - **Pinned tools.** `collect.yml` pins xray-knife to one release and checks its sha256. After each publish, the changed files are purged from the jsDelivr cache.
 - **GeoIP.** GeoLite2-Country comes from the [P3TERX/GeoLite.mmdb](https://github.com/P3TERX/GeoLite.mmdb) mirror and is only a fallback. GeoLite2 data © MaxMind, CC BY-SA 4.0.

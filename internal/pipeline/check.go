@@ -11,9 +11,20 @@ import (
 	"github.com/indelingDanil/MyAppVPN-subs/internal/vless"
 )
 
+// githubMaxFileBytes is GitHub's hard per-file push limit.
+const githubMaxFileBytes = 100 * 1000 * 1000
+
+// isAllFile reports whether a published file is all.txt / all-N.txt (or its .b64 twin): the
+// uncapped full list, exempt from the 500-line / 1 MB / no-RU rules of the app's files.
+func isAllFile(path string) bool {
+	base := strings.TrimSuffix(strings.TrimSuffix(filepath.Base(path), ".txt"), ".b64")
+	return base == "all" || strings.HasPrefix(base, "all-")
+}
+
 // Check verifies a published tree against the app contract: every .txt line parses and
 // passes the app filter, remarks start with a flag (or 🌐), ≤500 lines and <1 MB per file,
-// .b64 files decode to their .txt twins, and main files contain no UA/RU exits.
+// .b64 files decode to their .txt twins, and main files contain no UA/RU exits. all*.txt only
+// has to stay under GitHub's 100 MB file limit and contain no UA exits.
 func Check(out string, maxLines int) error {
 	var problems []string
 	files, _ := filepath.Glob(filepath.Join(out, "*.txt"))
@@ -27,11 +38,16 @@ func Check(out string, maxLines int) error {
 		if err != nil {
 			return err
 		}
-		if len(b) >= MaxFileBytes {
+		isAll := isAllFile(f) && filepath.Dir(f) == filepath.Clean(out)
+		limit := MaxFileBytes
+		if isAll {
+			limit = githubMaxFileBytes
+		}
+		if len(b) >= limit {
 			problems = append(problems, fmt.Sprintf("%s: %d bytes", f, len(b)))
 		}
 		ls := strings.Split(strings.TrimRight(string(b), "\n"), "\n")
-		if len(ls) > maxLines {
+		if !isAll && len(ls) > maxLines {
 			problems = append(problems, fmt.Sprintf("%s: %d lines", f, len(ls)))
 		}
 		isMain := filepath.Dir(f) == filepath.Clean(out)
@@ -49,7 +65,9 @@ func Check(out string, maxLines int) error {
 				problems = append(problems, fmt.Sprintf("%s:%d bad remark %q", f, i+1, c.Remark))
 				continue
 			}
-			if isMain && (fields[1] == "UA" || fields[1] == "RU") {
+			if isAll && fields[1] == "UA" {
+				problems = append(problems, fmt.Sprintf("%s:%d UA exit", f, i+1))
+			} else if isMain && !isAll && (fields[1] == "UA" || fields[1] == "RU") {
 				problems = append(problems, fmt.Sprintf("%s:%d %s exit in main file", f, i+1, fields[1]))
 			}
 		}
@@ -57,10 +75,10 @@ func Check(out string, maxLines int) error {
 			b64 := strings.TrimSuffix(f, ".txt") + ".b64"
 			if eb, err := os.ReadFile(b64); err == nil {
 				dec, err := base64.StdEncoding.DecodeString(strings.TrimSpace(string(eb)))
-				if err != nil || !bytes.HasPrefix(b, dec) {
-					problems = append(problems, fmt.Sprintf("%s does not decode to a prefix of %s", b64, f))
+				if err != nil || !bytes.HasPrefix(b, dec) || (isAll && !bytes.Equal(b, dec)) {
+					problems = append(problems, fmt.Sprintf("%s does not decode to %s", b64, f))
 				}
-				if len(eb) >= MaxFileBytes {
+				if len(eb) >= limit {
 					problems = append(problems, fmt.Sprintf("%s: %d bytes", b64, len(eb)))
 				}
 			}

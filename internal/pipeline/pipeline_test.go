@@ -120,7 +120,19 @@ func TestPublishContract(t *testing.T) {
 	if !strings.Contains(first, "security=reality") || !strings.Contains(first, "#%F0%9F%87") {
 		t.Errorf("first line should be reality with a flag remark: %s", first)
 	}
-	for _, f := range []string{"vless.b64", "reality.txt", "reality.b64", "meta.json", "stats.md"} {
+	// all.txt: every alive config the app accepts, UA excluded, RU kept, no per-country cap.
+	ab, _ := os.ReadFile(filepath.Join(out, "all.txt"))
+	allLines := strings.Split(strings.TrimRight(string(ab), "\n"), "\n")
+	if res.All != 120 || len(allLines) != 120 || res.AllFiles[0] != "all.txt" { // 140 minus 20 UA
+		t.Errorf("all.txt has %d lines (res.All=%d %v), want 120", len(allLines), res.All, res.AllFiles)
+	}
+	if !strings.Contains(string(ab), "%20RU%20") || strings.Contains(string(ab), "%20UA%20") {
+		t.Error("all.txt should keep RU and drop UA")
+	}
+	if allLines[0] != first {
+		t.Error("all.txt should be ranked like vless.txt")
+	}
+	for _, f := range []string{"vless.b64", "reality.txt", "reality.b64", "all.b64", "meta.json", "stats.md"} {
 		if _, err := os.Stat(filepath.Join(out, f)); err != nil {
 			t.Errorf("%s missing", f)
 		}

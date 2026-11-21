@@ -20,7 +20,7 @@ import (
 // CollectOptions tune collect.
 type CollectOptions struct {
 	RegistryDir    string
-	MaxCandidates  int // hard cap on unique candidates (default 20000)
+	MaxCandidates  int // cap on unique candidates; 0 = no cap (default; local testing only)
 	Workers        int // concurrent source fetches
 	PinnedOnly     bool
 	FreshnessCalls int           // GitHub commits-API calls allowed per run
@@ -48,9 +48,6 @@ func ExcludedPath(dir string) string { return filepath.Join(dir, "excluded.json"
 // <dir>/candidates.jsonl, <dir>/excluded.json and the updated <dir>/state/sources.json.
 func Collect(ctx context.Context, dir string, opt CollectOptions, now time.Time) (CollectResult, error) {
 	var res CollectResult
-	if opt.MaxCandidates <= 0 {
-		opt.MaxCandidates = 20000
-	}
 	if opt.Workers <= 0 {
 		opt.Workers = 16
 	}
@@ -105,7 +102,7 @@ func Collect(ctx context.Context, dir string, opt CollectOptions, now time.Time)
 	wg.Wait()
 
 	budget := opt.FreshnessCalls
-	// Merge in priority order (pinned, then score) so the cap keeps the best sources.
+	// Merge in priority order (pinned, then score): the first source of a config is its best one.
 	byKey := map[string]int{}
 	var cands []Candidate
 	for i, s := range srcs {
@@ -158,7 +155,7 @@ func Collect(ctx context.Context, dir string, opt CollectOptions, now time.Time)
 				cands[idx].Pinned = cands[idx].Pinned || s.Pinned
 				continue
 			}
-			if len(cands) >= opt.MaxCandidates {
+			if opt.MaxCandidates > 0 && len(cands) >= opt.MaxCandidates {
 				continue
 			}
 			byKey[k] = len(cands)

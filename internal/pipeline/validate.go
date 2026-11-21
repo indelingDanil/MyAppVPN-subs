@@ -16,7 +16,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/indelingDanil/MyAppVPN-subs/internal/registry"
 	"github.com/indelingDanil/MyAppVPN-subs/internal/vless"
 )
 
@@ -30,8 +29,10 @@ type ValidateOptions struct {
 	XKThreads   int
 	XKTimeoutMs int
 	XKURL       string
-	MaxXray     int
+	MaxXray     int  // 0 = xray-test every TCP-alive config (default); >0 = only the best N (local use)
 	XKRealIP    bool // ask xray-knife for the egress IP + country (one extra request per config)
+	Shard       int  // this shard, 0..Shards-1
+	Shards      int  // 0/1 = unsharded (state updated in place); >1 = result left in <dir>/shards/<Shard>/ for Merge
 }
 
 // ValidateResult summarises a validate run.
@@ -39,16 +40,24 @@ type ValidateResult struct {
 	Candidates, TCPAlive, XrayTested, Alive int
 }
 
-// Validate runs the liveness checks (no speed filtering: runners are in US/EU, users in RU)
-// and writes <dir>/alive.jsonl, updating history and per-source alive stats.
+// Validate runs the liveness checks (no speed filtering: runners are in US/EU, users in RU).
+// Unsharded, it writes <dir>/alive.jsonl and updates history and per-source alive stats.
+// With opt.Shards > 1 it tests only its own shard and leaves the result for Merge.
 func Validate(ctx context.Context, dir string, opt ValidateOptions, now time.Time) (ValidateResult, error) {
 	var res ValidateResult
-	cands, err := readJSONL(CandidatesPath(dir))
+	if opt.Shards > MaxShards || (opt.Shards > 1 && (opt.Shard < 0 || opt.Shard >= opt.Shards)) {
+		return res, fmt.Errorf("bad shard %d of %d", opt.Shard, opt.Shards)
+	}
+	all, err := readJSONL(CandidatesPath(dir))
 	if err != nil {
 		return res, fmt.Errorf("read candidates (run collect first): %w", err)
 	}
+	cands := filterShard(all, opt.Shard, opt.Shards)
 	res.Candidates = len(cands)
-	hist, err := LoadHistory(HistoryPath(dir))
+	if opt.Shards > 1 {
+		log.Printf("validate: shard %d/%d: %d of %d candidates", opt.Shard, opt.Shards, len(cands), len(all))
+	}
+	hist, err := LoadHistory(HistoryPath(dir)) // read-only here (ordering for --max-xray)
 	if err != nil {
 		return res, err
 	}
@@ -60,7 +69,7 @@ func Validate(ctx context.Context, dir string, opt ValidateOptions, now time.Tim
 
 	// Stage 2: real delay through xray-knife.
 	if !opt.SkipXray {
-		// Prefer historically stable, pinned, fast-to-connect configs if we must cap.
+		// Prefer historically stable, pinned, fast-to-connect configs if a cap is set.
 		sort.SliceStable(alive, func(i, j int) bool {
 			hi, hj := streak(hist, alive[i].Key), streak(hist, alive[j].Key)
 			if hi != hj {
@@ -72,6 +81,7 @@ func Validate(ctx context.Context, dir string, opt ValidateOptions, now time.Tim
 			return alive[i].TCPms < alive[j].TCPms
 		})
 		if opt.MaxXray > 0 && len(alive) > opt.MaxXray {
+			log.Printf("validate: --max-xray %d: %d TCP-alive configs left untested", opt.MaxXray, len(alive)-opt.MaxXray)
 			alive = alive[:opt.MaxXray]
 		}
 		res.XrayTested = len(alive)
@@ -83,40 +93,20 @@ func Validate(ctx context.Context, dir string, opt ValidateOptions, now time.Tim
 	}
 	res.Alive = len(alive)
 
-	ok := map[string]bool{}
-	for _, c := range alive {
-		ok[c.Key] = true
-	}
-	for _, c := range cands {
-		hist.Observe(c.Key, ok[c.Key], now)
-	}
-	hist.Expire(now)
-	if err := hist.Save(HistoryPath(dir)); err != nil {
-		return res, err
-	}
-
-	// Per-source alive counts → source score.
-	if opt.RegistryDir != "" {
-		perSrc := map[string]int{}
-		for _, c := range alive {
-			for _, s := range c.Sources {
-				perSrc[s]++
-			}
-		}
-		reg, err := registry.Load(opt.RegistryDir, SourcesStatePath(dir), now)
+	if opt.Shards > 1 {
+		fp, err := candidatesFingerprint(dir)
 		if err != nil {
 			return res, err
 		}
-		for _, s := range reg.Sources {
-			if s.LastFetch.Equal(now) || now.Sub(s.LastFetch) < 2*time.Hour { // fetched this run
-				s.RecordAlive(perSrc[s.URL])
-			}
-		}
-		if err := reg.Save(SourcesStatePath(dir)); err != nil {
-			return res, err
-		}
+		return res, writeShard(dir, ShardMeta{
+			Shard: opt.Shard, Shards: opt.Shards, Fingerprint: fp,
+			Candidates: res.Candidates, TCPAlive: res.TCPAlive, XrayTested: res.XrayTested,
+			Alive: res.Alive, SkipXray: opt.SkipXray,
+		}, alive)
 	}
-	return res, writeJSONL(AlivePath(dir), alive)
+	st := ValidateStats{Candidates: res.Candidates, TCPAlive: res.TCPAlive, XrayTested: res.XrayTested,
+		Alive: res.Alive, SkipXray: opt.SkipXray, Shards: 1}
+	return res, applyResults(dir, opt.RegistryDir, cands, alive, true, st, now)
 }
 
 func streak(h History, k string) int {

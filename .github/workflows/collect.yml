@@ -23,13 +23,22 @@ env:
   # Only a fallback: the remark country normally comes from the egress IP xray-knife reports.
   MMDB_URL: https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
   REPO_CDN: indelingDanil/MyAppVPN-subs
+  # Validation is split into ceil(candidates / PER_SHARD) parallel jobs, at most MAX_SHARDS
+  # (20 = the concurrent-job limit of a free account). Past that each shard just gets more
+  # work; nothing is dropped.
+  PER_SHARD: 3000
+  MAX_SHARDS: 20
 
 jobs:
+  # 1. Fetch every source, dedupe → work/candidates.jsonl; plan the validate shards.
   collect:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      shards: ${{ steps.plan.outputs.shards }}
+      matrix: ${{ steps.plan.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,17 +60,53 @@ jobs:
           fi
           ls -la work/state
 
-      - name: Download GeoLite2-Country
+      - name: Build
+        run: go build -trimpath -o subs ./cmd/subs
+
+      - name: Collect
+        run: ./subs collect --dir work --registry registry
+
+      - name: Plan validate shards
+        id: plan
         run: |
-          if curl -fsSL --retry 3 --max-time 120 -o GeoLite2-Country.mmdb "$MMDB_URL"; then
-            ls -la GeoLite2-Country.mmdb
-          else
-            echo "::warning::mmdb download failed — falling back to xray-knife egress country only"
-            rm -f GeoLite2-Country.mmdb
-          fi
+          n=$(wc -l < work/candidates.jsonl)
+          shards=$(./subs shards --dir work --per-shard "$PER_SHARD" --max-shards "$MAX_SHARDS")
+          matrix=$(seq 0 $((shards - 1)) | jq -cs .)
+          echo "candidates=$n shards=$shards matrix=$matrix"
+          echo "shards=$shards" >> "$GITHUB_OUTPUT"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+      - name: Upload work dir
+        uses: actions/upload-artifact@v4
+        with:
+          name: work
+          path: |
+            subs
+            work/candidates.jsonl
+            work/excluded.json
+            work/state/
+          retention-days: 1
+          if-no-files-found: error
+
+  # 2. TCP + xray real delay, one shard of the candidates per job (stable split by config key).
+  validate:
+    needs: collect
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: ${{ fromJSON(needs.collect.outputs.matrix) }}
+    steps:
+      - name: Download work dir
+        uses: actions/download-artifact@v4
+        with:
+          name: work
 
       - name: Install xray-knife ${{ env.XRAY_KNIFE_VERSION }}
         run: |
+          chmod +x subs
           curl -fsSL --retry 3 -o xk.zip \
             "https://github.com/lilendian0x00/xray-knife/releases/download/${XRAY_KNIFE_VERSION}/Xray-knife-linux-64.zip"
           echo "${XRAY_KNIFE_SHA256}  xk.zip" | sha256sum -c -
@@ -71,14 +116,64 @@ jobs:
           "$XK" --version
           echo "XK=$PWD/$XK" >> "$GITHUB_ENV"
 
-      - name: Build
-        run: go build -trimpath -o subs ./cmd/subs
+      - name: Validate shard ${{ matrix.shard }} of ${{ needs.collect.outputs.shards }}
+        run: |
+          ./subs validate --dir work --xray-knife "$XK" \
+            --shard "${{ matrix.shard }}" --shards "${{ needs.collect.outputs.shards }}"
 
-      - name: Collect
-        run: ./subs collect --dir work --registry registry
+      - name: Upload shard result
+        uses: actions/upload-artifact@v4
+        with:
+          name: shard-${{ matrix.shard }}
+          path: work/shards/${{ matrix.shard }}/
+          retention-days: 1
+          if-no-files-found: error
 
-      - name: Validate (TCP + xray real delay)
-        run: ./subs validate --dir work --registry registry --xray-knife "$XK"
+  # 3. Merge shards (history + source stats), publish, push the output branch, purge jsDelivr.
+  # Runs even if some shards failed: their configs are left out of this run and their history
+  # is left unchanged (see stats.md). Merge fails if no shard reported.
+  publish:
+    needs: [collect, validate]
+    if: ${{ !cancelled() && needs.collect.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download work dir
+        uses: actions/download-artifact@v4
+        with:
+          name: work
+
+      - name: Download shard results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: shard-*
+          path: work/shards
+
+      - name: Previous output (for the jsDelivr purge diff)
+        run: |
+          chmod +x subs
+          mkdir -p prev
+          if git fetch --depth=1 origin output 2>/dev/null; then
+            git archive FETCH_HEAD | tar -x -C prev
+          fi
+
+      - name: Download GeoLite2-Country
+        run: |
+          if curl -fsSL --retry 3 --max-time 120 -o GeoLite2-Country.mmdb "$MMDB_URL"; then
+            ls -la GeoLite2-Country.mmdb
+          else
+            echo "::warning::mmdb download failed — falling back to xray-knife egress country only"
+            rm -f GeoLite2-Country.mmdb
+          fi
+
+      - name: Merge shards
+        run: ./subs merge --dir work --registry registry
 
       - name: Publish
         run: |
@@ -102,9 +197,11 @@ jobs:
         continue-on-error: true
         run: |
           cd out
-          for f in vless.txt vless.b64 reality.txt reality.b64 meta.json stats.md by-country/*.txt; do
+          for f in vless.txt vless.b64 reality.txt reality.b64 all.txt all.b64 all-*.txt all-*.b64 meta.json stats.md by-country/*.txt; do
             [ -f "$f" ] || continue
             if [ -f "../prev/$f" ] && cmp -s "$f" "../prev/$f"; then continue; fi
+            # jsDelivr does not serve GitHub files over 20 MB: nothing to purge
+            if [ "$(stat -c %s "$f")" -gt 20000000 ]; then echo "skip $f (> 20 MB)"; continue; fi
             code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "https://purge.jsdelivr.net/gh/${REPO_CDN}@output/$f")
             echo "purge $f -> $code"
           done

@@ -30,6 +30,9 @@ type PublishOptions struct {
 type PublishResult struct {
 	Total, Reality, TLS, RealityFile int
 	ByCountry                        map[string]int
+	All                              int      // lines in all.txt (all parts)
+	AllFiles                         []string // all.txt, or all-1.txt, all-2.txt…
+	AllBytes                         int64
 }
 
 // MaxFileBytes keeps every published file under the app's 1 MB limit.
@@ -159,6 +162,18 @@ func Publish(dir string, opt PublishOptions, now time.Time) (PublishResult, erro
 	if err := writeList(out, "reality", reality); err != nil {
 		return res, err
 	}
+	// all.txt: every alive config the bot publishes anywhere (all countries except UA), same
+	// order and remarks, no line cap. Split into all-1.txt, all-2.txt… only past GitHub's limit.
+	var all []ranked
+	for _, it := range items {
+		if !excludedEverywhere[it.CC] {
+			all = append(all, it)
+		}
+	}
+	res.All = len(all)
+	if res.AllFiles, res.AllBytes, err = writeAll(out, lines(all)); err != nil {
+		return res, err
+	}
 	ccs := make([]string, 0, len(byCountry))
 	for cc, list := range byCountry {
 		if err := writeText(filepath.Join(out, "by-country", cc+".txt"), lines(list)); err != nil {
@@ -183,28 +198,55 @@ func Publish(dir string, opt PublishOptions, now time.Time) (PublishResult, erro
 	if sourcesUsed < 0 {
 		sourcesUsed = countSourcesUsed(dir, now)
 	}
+	counts := map[string]any{
+		"total":      res.Total,
+		"reality":    res.Reality,
+		"tls":        res.TLS,
+		"by_country": res.ByCountry,
+		"published":  res.All,
+	}
+	vst, haveVST := readValidateStats(dir)
+	if haveVST {
+		counts["collected"] = vst.Candidates
+		counts["tcp_alive"] = vst.TCPAlive
+		if vst.SkipXray {
+			counts["xray_tested"], counts["xray_alive"] = nil, nil
+		} else {
+			counts["xray_tested"], counts["xray_alive"] = vst.XrayTested, vst.Alive
+		}
+	}
+	files := map[string]int{
+		"vless.txt":   len(main),
+		"reality.txt": len(reality),
+	}
+	if len(res.AllFiles) == 1 {
+		files["all.txt"] = res.All
+	}
 	meta := map[string]any{
-		"schema":     1,
-		"updated_at": now.Format(time.RFC3339),
-		"counts": map[string]any{
-			"total":      res.Total,
-			"reality":    res.Reality,
-			"tls":        res.TLS,
-			"by_country": res.ByCountry,
-		},
+		"schema":       1,
+		"updated_at":   now.Format(time.RFC3339),
+		"counts":       counts,
 		"sources_used": sourcesUsed,
-		"files": map[string]int{
-			"vless.txt":   len(main),
-			"reality.txt": len(reality),
-		},
-		"alive_total": len(items),
-		"excluded":    excluded,
+		"files":        files,
+		"all_files":    res.AllFiles,
+		"alive_total":  len(items),
+		"excluded":     excluded,
+	}
+	if haveVST {
+		meta["validate"] = map[string]any{
+			"shards":         vst.Shards,
+			"shards_missing": append([]int{}, vst.ShardsMissing...),
+			"untested":       vst.Untested,
+			"xray_skipped":   vst.SkipXray,
+		}
 	}
 	mb, _ := json.MarshalIndent(meta, "", "  ")
 	if err := os.WriteFile(filepath.Join(out, "meta.json"), append(mb, '\n'), 0o644); err != nil {
 		return res, err
 	}
-	if err := os.WriteFile(filepath.Join(out, "stats.md"), []byte(statsMD(res, len(reality), len(items), sourcesUsed, ccs, perCC, excluded, now)), 0o644); err != nil {
+	sm := statsMD(statsInput{res: res, realityFile: len(reality), alive: len(items), sources: sourcesUsed,
+		ccs: ccs, perCC: perCC, excluded: excluded, vst: vst, haveVST: haveVST, now: now})
+	if err := os.WriteFile(filepath.Join(out, "stats.md"), []byte(sm), 0o644); err != nil {
 		return res, err
 	}
 	if err := os.WriteFile(filepath.Join(out, "README.md"), []byte(outputReadme), 0o644); err != nil {
@@ -275,21 +317,121 @@ func countSourcesUsed(dir string, now time.Time) int {
 	return n
 }
 
-func statsMD(res PublishResult, realityFile, alive, sources int, ccs []string, perCC map[string]int, excluded []Excluded, now time.Time) string {
-	var b strings.Builder
-	fmt.Fprintf(&b, "# MyAppVPN-subs — stats\n\nUpdated: **%s**\n\n", now.Format("2006-01-02 15:04 UTC"))
-	fmt.Fprintf(&b, "| | |\n|---|---|\n")
-	fmt.Fprintf(&b, "| vless.txt | %d (reality %d, tls %d) |\n", res.Total, res.Reality, res.TLS)
-	fmt.Fprintf(&b, "| reality.txt | %d |\n", realityFile)
-	fmt.Fprintf(&b, "| alive (all countries) | %d |\n", alive)
-	fmt.Fprintf(&b, "| sources used | %d |\n\n", sources)
-	fmt.Fprintf(&b, "| Country | by-country file | in vless.txt |\n|---|---:|---:|\n")
-	for _, cc := range ccs {
-		fmt.Fprintf(&b, "| %s %s | %d | %d |\n", geo.Flag(cc), cc, res.ByCountry[cc], perCC[cc])
+// AllPartBytes bounds each all*.txt / all*.b64 file under GitHub's 100 MB hard file limit
+// (the .b64 twin is the larger one, so parts are cut on its size).
+const AllPartBytes = 95 * 1000 * 1000
+
+// AllWarnBytes: above this stats.md warns that all.txt is getting heavy for clients.
+const AllWarnBytes = 10 * 1000 * 1000
+
+// jsDelivr does not serve GitHub files larger than this.
+const jsDelivrMaxBytes = 20 * 1000 * 1000
+
+// writeAll writes every line to all.txt + all.b64, or to all-1.txt/.b64, all-2.txt/.b64… when
+// one file would exceed partBytes. Old all*.txt / all*.b64 files are removed first. It returns
+// the .txt names written and their total size.
+func writeAll(out string, ls []string, partBytes ...int) ([]string, int64, error) {
+	limit := AllPartBytes
+	if len(partBytes) > 0 && partBytes[0] > 0 {
+		limit = partBytes[0]
 	}
-	if len(excluded) > 0 {
-		fmt.Fprintf(&b, "\n## Excluded sources (%d)\n\n| Source | Reason |\n|---|---|\n", len(excluded))
-		for _, e := range excluded {
+	for _, pat := range []string{"all.txt", "all.b64", "all-*.txt", "all-*.b64"} {
+		old, _ := filepath.Glob(filepath.Join(out, pat))
+		for _, p := range old {
+			if err := os.Remove(p); err != nil {
+				return nil, 0, err
+			}
+		}
+	}
+	// Greedy split on the encoded size of each part.
+	var parts [][]string
+	start, size := 0, 0
+	for i, l := range ls {
+		n := len(l) + 1
+		if i > start && base64.StdEncoding.EncodedLen(size+n) > limit {
+			parts = append(parts, ls[start:i])
+			start, size = i, 0
+		}
+		size += n
+	}
+	parts = append(parts, ls[start:]) // also the single empty part when there are no lines
+	var names []string
+	var total int64
+	for i, p := range parts {
+		name := "all"
+		if len(parts) > 1 {
+			name = fmt.Sprintf("all-%d", i+1)
+		}
+		body := strings.Join(p, "\n")
+		if body != "" {
+			body += "\n"
+		}
+		if err := os.WriteFile(filepath.Join(out, name+".txt"), []byte(body), 0o644); err != nil {
+			return nil, 0, err
+		}
+		enc := base64.StdEncoding.EncodeToString([]byte(body))
+		if err := os.WriteFile(filepath.Join(out, name+".b64"), []byte(enc+"\n"), 0o644); err != nil {
+			return nil, 0, err
+		}
+		names = append(names, name+".txt")
+		total += int64(len(body))
+	}
+	return names, total, nil
+}
+
+type statsInput struct {
+	res                         PublishResult
+	realityFile, alive, sources int
+	ccs                         []string
+	perCC                       map[string]int
+	excluded                    []Excluded
+	vst                         ValidateStats
+	haveVST                     bool
+	now                         time.Time
+}
+
+func statsMD(in statsInput) string {
+	res := in.res
+	var b strings.Builder
+	fmt.Fprintf(&b, "# MyAppVPN-subs — stats\n\nUpdated: **%s**\n\n", in.now.Format("2006-01-02 15:04 UTC"))
+	fmt.Fprintf(&b, "| | |\n|---|---|\n")
+	if in.haveVST {
+		fmt.Fprintf(&b, "| collected (unique) | %d |\n", in.vst.Candidates)
+		fmt.Fprintf(&b, "| TCP-alive | %d |\n", in.vst.TCPAlive)
+		if in.vst.SkipXray {
+			fmt.Fprintf(&b, "| xray-alive | skipped (TCP only) |\n")
+		} else {
+			fmt.Fprintf(&b, "| xray-alive | %d of %d tested |\n", in.vst.Alive, in.vst.XrayTested)
+		}
+	}
+	fmt.Fprintf(&b, "| published (all.txt) | %d |\n", res.All)
+	fmt.Fprintf(&b, "| vless.txt | %d (reality %d, tls %d) |\n", res.Total, res.Reality, res.TLS)
+	fmt.Fprintf(&b, "| reality.txt | %d |\n", in.realityFile)
+	fmt.Fprintf(&b, "| alive (all countries) | %d |\n", in.alive)
+	fmt.Fprintf(&b, "| sources used | %d |\n", in.sources)
+	if in.haveVST && in.vst.Shards > 1 {
+		fmt.Fprintf(&b, "| validate shards | %d |\n", in.vst.Shards)
+	}
+	b.WriteString("\n")
+	if in.haveVST && len(in.vst.ShardsMissing) > 0 {
+		fmt.Fprintf(&b, "> ⚠️ Validate shards %v did not finish: %d configs were not tested this run.\n\n", in.vst.ShardsMissing, in.vst.Untested)
+	}
+	if len(res.AllFiles) > 1 {
+		fmt.Fprintf(&b, "> ⚠️ all.txt is split into %s (%.1f MB in total, GitHub's file limit is 100 MB).\n\n", strings.Join(res.AllFiles, ", "), float64(res.AllBytes)/1e6)
+	} else if res.AllBytes > AllWarnBytes {
+		fmt.Fprintf(&b, "> ⚠️ all.txt is %.1f MB: heavy for phone clients.", float64(res.AllBytes)/1e6)
+		if res.AllBytes > jsDelivrMaxBytes {
+			b.WriteString(" jsDelivr does not serve files over 20 MB, use the githack or GitHub raw link.")
+		}
+		b.WriteString("\n\n")
+	}
+	fmt.Fprintf(&b, "| Country | by-country file | in vless.txt |\n|---|---:|---:|\n")
+	for _, cc := range in.ccs {
+		fmt.Fprintf(&b, "| %s %s | %d | %d |\n", geo.Flag(cc), cc, res.ByCountry[cc], in.perCC[cc])
+	}
+	if len(in.excluded) > 0 {
+		fmt.Fprintf(&b, "\n## Excluded sources (%d)\n\n| Source | Reason |\n|---|---|\n", len(in.excluded))
+		for _, e := range in.excluded {
 			pin := ""
 			if e.Pinned {
 				pin = " (pinned)"
@@ -305,5 +447,6 @@ const outputReadme = `# MyAppVPN-subs — output
 Auto-generated branch (force-pushed every run, history is not kept).
 Source code, docs and disclaimer: https://github.com/indelingDanil/MyAppVPN-subs (branch ` + "`main`" + `).
 
-Files: vless.txt / vless.b64 (main list), reality.txt / reality.b64, by-country/<CC>.txt, meta.json, stats.md.
+Files: vless.txt / vless.b64 (main list), reality.txt / reality.b64, by-country/<CC>.txt,
+all.txt / all.b64 (every alive config, no line cap), meta.json, stats.md.
 `
