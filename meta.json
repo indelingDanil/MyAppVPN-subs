@@ -1,0 +1,96 @@
+{
+  "alive_total": 957,
+  "all_files": [
+    "all.txt"
+  ],
+  "counts": {
+    "by_country": {
+      "AE": 2,
+      "AL": 2,
+      "AM": 1,
+      "AT": 2,
+      "AU": 3,
+      "BG": 1,
+      "BY": 2,
+      "CA": 8,
+      "CH": 12,
+      "CY": 1,
+      "CZ": 1,
+      "DE": 181,
+      "DK": 1,
+      "EE": 6,
+      "ES": 42,
+      "FI": 44,
+      "FR": 29,
+      "GB": 22,
+      "HK": 11,
+      "IE": 2,
+      "IN": 4,
+      "IT": 2,
+      "JP": 83,
+      "KZ": 12,
+      "LT": 1,
+      "LV": 3,
+      "NL": 232,
+      "NO": 1,
+      "PL": 28,
+      "RO": 1,
+      "RU": 46,
+      "SE": 8,
+      "SG": 32,
+      "SK": 1,
+      "TR": 11,
+      "TW": 1,
+      "US": 112,
+      "VN": 3
+    },
+    "collected": 40427,
+    "published": 954,
+    "reality": 368,
+    "tcp_alive": 27714,
+    "tls": 86,
+    "total": 454,
+    "xray_alive": 957,
+    "xray_tested": 27714
+  },
+  "excluded": [
+    {
+      "url": "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-6.txt",
+      "reason": "stale 25d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/v2ray-base64.txt",
+      "reason": "stale 22d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/freenodess/freenodess/main/nodes/v2ray-base64.txt",
+      "reason": "stale 22d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-4.txt",
+      "reason": "stale 20d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-5.txt",
+      "reason": "stale 25d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hiztin/VLESS-PO-GRIBI/main/deploy/subscriptions/4.txt",
+      "reason": "stale 12d"
+    }
+  ],
+  "files": {
+    "all.txt": 954,
+    "reality.txt": 428,
+    "vless.txt": 454
+  },
+  "schema": 1,
+  "sources_used": 283,
+  "updated_at": "2026-11-21T19:27:11Z",
+  "validate": {
+    "shards": 14,
+    "shards_missing": [],
+    "untested": 0,
+    "xray_skipped": false
+  }
+}
