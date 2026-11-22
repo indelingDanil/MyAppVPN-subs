@@ -2,7 +2,8 @@
 
 `offers.json` is the list of partner offers the MyAppVPN app shows on the **"Проверенные
 платные подписки"** page (linked from the Home screen and the Support tab). Every offer here
-was tested by the author together with MyAppVPN. Changes reach the app without a new release.
+was tested by the author together with MyAppVPN (usually on a trial the partner gave): the
+subscription loads, servers connect, traffic flows. Changes reach the app without a new release.
 
 The app downloads this file at most every 12 hours, from the first mirror that answers:
 
@@ -30,15 +31,15 @@ broken or unreachable, the app keeps the last good copy.
 | `url` | yes | `https://` only, the referral link. Opened in the browser. |
 | `category` | no | `vpn` → "VPN-подписки" section; anything else → "Другие сервисы". |
 | `subscription` | no | `true` (default for `vpn`): the card says the subscription can be added to the app. |
-| `trialUrl` | no | `https://` link to a **public** trial subscription given by the partner. Adds a «Попробовать бесплатно» button that adds it to the app in one tap. Never put a personal subscription link here — everyone would share its key and traffic. |
-| `trialNote` | no | Language → text, e.g. `"10 ГБ на 7 дней"`. |
+| `testedAt` | no | `YYYY-MM-DD` — when the author last tested the service with MyAppVPN (usually on a trial). Shown as "Проверено с MyAppVPN · 22.11.2026". |
+| `features` | no | Language → short text of what was checked, e.g. `"VLESS REALITY, Hysteria2 · YouTube без рекламы"`. |
 | `tg`, `tgStart` | no | Telegram bot/channel username and `start` parameter (referral). Opened in the Telegram app. |
 | `icon` | no | `game`, `vpn`, `shop`, `ai`, `card`, `gift`. Default `shop`. |
 | `weight` | no | Integer ≥ 1. Higher = higher on the page. |
 | `until` | no | `YYYY-MM-DD`. The offer disappears after this date. |
 | `enabled` | no | `false` hides the offer without deleting it. |
 
-## Example: VPN with a public trial
+## Example: VPN tested on a trial
 
 ```json
 {
@@ -46,9 +47,9 @@ broken or unreachable, the app keeps the last good copy.
   "title": "Example VPN",
   "category": "vpn",
   "text": { "ru": "Стабильный VLESS + Hysteria2, YouTube без рекламы", "en": "Stable VLESS + Hysteria2, ad-free YouTube" },
-  "trialNote": { "ru": "10 ГБ бесплатно", "en": "10 GB free" },
+  "features": { "ru": "VLESS REALITY, Hysteria2 · YouTube без рекламы", "en": "VLESS REALITY, Hysteria2 · ad-free YouTube" },
+  "testedAt": "2026-11-22",
   "url": "https://example.com/?ref=XXXX",
-  "trialUrl": "https://example.com/sub/public-trial",
   "tg": "ExampleBot",
   "tgStart": "ref_XXXX",
   "icon": "vpn",

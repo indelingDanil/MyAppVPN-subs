@@ -39,7 +39,8 @@ for (const [i, o] of (data.offers || []).entries()) {
   if (o.weight !== undefined && !(Number.isInteger(o.weight) && o.weight >= 1)) errors.push(`${at}: "weight" must be an integer ≥ 1`);
   if (o.until !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(o.until)) errors.push(`${at}: "until" must be YYYY-MM-DD`);
   if (o.until && new Date(o.until + "T23:59:59Z") < new Date()) warns.push(`${at}: "until" is in the past — the offer is hidden`);
-  if (o.trialUrl !== undefined && !httpsOk(o.trialUrl)) errors.push(`${at}: "trialUrl" must be an https:// link`);
+  if (o.testedAt !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(o.testedAt)) errors.push(`${at}: "testedAt" must be YYYY-MM-DD`);
+  if (o.features !== undefined && (typeof o.features !== "object" || !Object.keys(o.features).length)) errors.push(`${at}: "features" must be a language → text map`);
   if (o.enabled === false) warns.push(`${at}: disabled`);
 }
 
