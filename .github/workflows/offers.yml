@@ -1,0 +1,37 @@
+name: offers
+
+# Edit offers/offers.json right on GitHub (pencil icon) → this checks it and purges the
+# jsDelivr cache so apps get the new list within minutes instead of up to 12 hours.
+on:
+  push:
+    branches: [main]
+    paths: ["offers/offers.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: offers
+  cancel-in-progress: true
+
+jobs:
+  check-and-purge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate offers.json
+        run: node offers/validate.mjs offers/offers.json
+
+      - name: Purge jsDelivr cache
+        run: |
+          url="https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@main/offers/offers.json"
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$url")
+            echo "purge attempt $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 5
+          done
+          echo "::warning::jsDelivr purge failed; apps will pick the change up within 12 hours"
