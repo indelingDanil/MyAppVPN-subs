@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "offers": [
+    {
+      "id": "yepshop",
+      "title": "YepShop",
+      "text": {
+        "ru": "Пополнение Steam, игр и сервисов",
+        "en": "Top up Steam, games and services",
+        "fa": "شارژ Steam، بازی‌ها و سرویس‌ها",
+        "zh": "充值 Steam、游戏和服务",
+        "tr": "Steam, oyun ve hizmet bakiyesi yükleme",
+        "kk": "Steam, ойындар мен сервистерді толтыру",
+        "uz": "Steam, oʻyinlar va xizmatlarni toʻldirish"
+      },
+      "url": "https://yepshop.app/?ref=6A086889",
+      "tg": "YepShopBot",
+      "tgStart": "ref_6A086889",
+      "icon": "game",
+      "weight": 1,
+      "enabled": true
+    }
+  ]
+}
