@@ -5,13 +5,13 @@
       "id": "yepshop",
       "title": "YepShop",
       "text": {
-        "ru": "Пополнение Steam, игр и сервисов",
-        "en": "Top up Steam, games and services",
-        "fa": "شارژ Steam، بازی‌ها و سرویس‌ها",
-        "zh": "充值 Steam、游戏和服务",
-        "tr": "Steam, oyun ve hizmet bakiyesi yükleme",
-        "kk": "Steam, ойындар мен сервистерді толтыру",
-        "uz": "Steam, oʻyinlar va xizmatlarni toʻldirish"
+        "ru": "«Безопасный интернет» (VPN), пополнение Steam, игр и сервисов",
+        "en": "\"Safe Internet\" VPN, Steam, game and service top-ups",
+        "fa": "VPN «اینترنت امن»، شارژ Steam، بازی‌ها و سرویس‌ها",
+        "zh": "「安全上网」VPN，充值 Steam、游戏和服务",
+        "tr": "\"Güvenli İnternet\" VPN, Steam, oyun ve hizmet bakiyesi",
+        "kk": "«Қауіпсіз интернет» VPN, Steam, ойындар мен сервистерді толтыру",
+        "uz": "«Xavfsiz internet» VPN, Steam, oʻyinlar va xizmatlarni toʻldirish"
       },
       "url": "https://yepshop.app/?ref=6A086889",
       "tg": "YepShopBot",
