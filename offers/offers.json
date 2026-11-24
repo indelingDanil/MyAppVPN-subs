@@ -19,6 +19,26 @@
       "icon": "game",
       "weight": 1,
       "enabled": true
+    },
+    {
+      "id": "voxgate",
+      "title": "VoxGate",
+      "category": "vpn",
+      "text": {
+        "ru": "VPN-подписка для любого клиента, есть пробный день",
+        "en": "VPN subscription for any client, 1-day trial",
+        "fa": "اشتراک VPN برای هر کلاینتی، یک روز آزمایشی",
+        "zh": "适用于任何客户端的 VPN 订阅，可试用 1 天",
+        "tr": "Her istemciyle çalışan VPN aboneliği, 1 günlük deneme",
+        "kk": "Кез келген клиентке арналған VPN жазылымы, 1 күндік сынақ",
+        "uz": "Istalgan mijoz uchun VPN obunasi, 1 kunlik sinov"
+      },
+      "url": "https://lk.voxgate.app/?ref=refW2Zp0j19",
+      "tg": "voxgate_bot",
+      "tgStart": "refW2Zp0j19",
+      "icon": "vpn",
+      "weight": 1,
+      "enabled": true
     }
   ]
 }
