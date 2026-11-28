@@ -1,0 +1,167 @@
+{
+  "alive_total": 1235,
+  "all_files": [
+    "all.txt"
+  ],
+  "counts": {
+    "by_country": {
+      "AT": 6,
+      "AU": 4,
+      "BG": 3,
+      "BR": 1,
+      "BY": 3,
+      "BZ": 1,
+      "CA": 7,
+      "CH": 6,
+      "CZ": 5,
+      "DE": 168,
+      "EE": 7,
+      "ES": 38,
+      "FI": 45,
+      "FR": 43,
+      "GB": 18,
+      "GR": 2,
+      "HK": 14,
+      "ID": 1,
+      "IE": 2,
+      "IL": 3,
+      "IN": 9,
+      "IR": 1,
+      "IT": 4,
+      "JP": 154,
+      "KR": 6,
+      "KZ": 6,
+      "LV": 12,
+      "MD": 2,
+      "MK": 1,
+      "MX": 2,
+      "NL": 223,
+      "NO": 2,
+      "PL": 33,
+      "PT": 1,
+      "RO": 2,
+      "RU": 31,
+      "SC": 6,
+      "SE": 12,
+      "SG": 30,
+      "TH": 1,
+      "TR": 5,
+      "TW": 3,
+      "US": 307,
+      "VN": 4,
+      "ZA": 1
+    },
+    "collected": 38284,
+    "published": 1235,
+    "reality": 361,
+    "tcp_alive": 25890,
+    "tls": 139,
+    "total": 500,
+    "xray_alive": 1235,
+    "xray_tested": 25890
+  },
+  "excluded": [
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/curated.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/verified_tls.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/ipv6_only.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/stable.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/ipv4_only.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/everything.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/all_configs.txt",
+      "reason": "404 (gone since 2026-11-24)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/protocols/vless.txt",
+      "reason": "404 (gone since 2026-11-24)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/top.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/top_ipv6.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/verified.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/protocols/vless.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/rtwo2/FastNodes/main/sub/countries/DE.txt",
+      "reason": "404 (gone since 2026-11-26)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/v2ray-base64.txt",
+      "reason": "stale 28d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/freenodess/freenodess/main/nodes/v2ray-base64.txt",
+      "reason": "stale 28d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/patt/all.txt",
+      "reason": "404 (gone since 2026-11-24)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/patt/protocols/vless.txt",
+      "reason": "404 (gone since 2026-11-24)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/patt/batches/batch_001.txt",
+      "reason": "404 (gone since 2026-11-24)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/hiztin/VLESS-PO-GRIBI/main/deploy/subscriptions/4.txt",
+      "reason": "stale 18d"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/batches/v2ray/batch_006.txt",
+      "reason": "404 (gone since 2026-11-24)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/batches/v2ray/batch_003.txt",
+      "reason": "404 (gone since 2026-11-24)"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/main/config/batches/v2ray/batch_009.txt",
+      "reason": "404 (gone since 2026-11-24)"
+    }
+  ],
+  "files": {
+    "all.txt": 1235,
+    "reality.txt": 421,
+    "vless.txt": 500
+  },
+  "schema": 1,
+  "sources_used": 263,
+  "updated_at": "2026-11-28T08:01:24Z",
+  "validate": {
+    "shards": 13,
+    "shards_missing": [],
+    "untested": 0,
+    "xray_skipped": false
+  }
+}

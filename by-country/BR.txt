@@ -1,0 +1,1 @@
+vless://999db268-cccb-4e5b-9d63-39dc44e4ee33@38.60.241.206:8443?encryption=none&fp=firefox&pbk=KoOzrz6SIa19JGlY52ZTPbfRgT0QWGBIu9IQ_Ko6KVY&security=reality&sid=feb19ce078ab&sni=br.financas.yahoo.com&type=tcp#%F0%9F%87%A7%F0%9F%87%B7%20BR%20reality-0601

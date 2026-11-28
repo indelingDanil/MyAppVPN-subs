@@ -1,0 +1,1 @@
+vless://0b7337bf-dcff-432b-9ec6-b4fb6d22fc92@45.135.235.255:443?type=ws&security=tls&fp=firefox&host=worker3.fivon81984.workers.dev#%F0%9F%87%A7%F0%9F%87%BF%20BZ%20tls-0335

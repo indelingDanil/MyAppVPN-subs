@@ -1,0 +1,1 @@
+vless://c3d91e48-6d7c-406d-aea3-b99c575dcd80@id1vpn.jagoanip.my.id:443?allowInsecure=0&encryption=none&host=id1vpn.jagoanip.my.id&insecure=0&path=/vless&security=tls&sni=id1vpn.jagoanip.my.id&type=ws#%F0%9F%87%AE%F0%9F%87%A9%20ID%20tls-0613
